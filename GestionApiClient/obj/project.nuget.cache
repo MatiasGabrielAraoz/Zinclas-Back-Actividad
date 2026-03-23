@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "cwhVdV8CXM0=",
+  "success": true,
+  "projectFilePath": "/home/matias/Projects/ZinclasActivities/GestionApiClient/GestionApiClient.csproj",
+  "expectedPackageFiles": [
+    "/home/matias/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.25/microsoft.aspnetcore.app.ref.8.0.25.nupkg.sha512"
+  ],
+  "logs": []
+}

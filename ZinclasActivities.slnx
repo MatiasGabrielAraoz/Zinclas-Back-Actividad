@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="GestionApi/GestionApi.csproj" />
+  <Project Path="GestionApiClient/GestionApiClient.csproj" />
+  <Project Path="GestionConsole/GestionConsole.csproj" />
+</Solution>
