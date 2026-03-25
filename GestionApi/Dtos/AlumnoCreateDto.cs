@@ -7,10 +7,9 @@ namespace GestionApi.Dtos
 	public class AlumnoGetDto{
 		public string Name {get; set;} = "";
 		public int ID {get; set;}
-		public string NombreCurso {get; set;} 
 	}
 	public class AlumnoDeleteDto{
-		public int ID {get; set;}
-		public string Password {get; set;}
+		required public int ID {get; set;}
+		required public string Password {get; set;} = "";
 	}
 }

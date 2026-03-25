@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using GestionApi.Data;
@@ -17,41 +18,60 @@ namespace GestionApi.Controllers{
 			_config = config;
 		}
 
-		// GET: /api/Alumnos/{id}
 		[HttpGet("{id}")]
-		public async Task<ActionResult<Alumno>> GetAlumnos(int id){
+		public async Task<ActionResult<Alumno>> GetAlumnos([FromRoute] int id){
 			var alumno = await _context.Alumnos
 				.Include(a => a.Curso)
 				.FirstOrDefaultAsync(a => a.ID == id);
 			if (alumno == null){
-				return NotFound(new { message = "No se encontró ningún alumno con esa ID"});
+				return NotFound(new { message = "No se encontró el alumno"});
 			}
-			return Ok(new AlumnoGetDto {
-				ID = alumno.ID,
+			
+			var alumnoDto = new AlumnoGetDto{
 				Name = alumno.Name,
-				NombreCurso = alumno.Curso?.Name ?? "Sin curso",
-			});
+				ID = alumno.ID
+			};
+						
+			return Ok(alumnoDto);
 		}
 
-		[HttpPost]
-		public async Task<ActionResult<Alumno>> PostAlumno(AlumnoCreateDto dto){
+		[HttpGet("List")]
+		public async Task<ActionResult<List<Alumno>>> ListAllAlumnos(){
+			var alumnosDto = await _context.Alumnos
+				.Select(alumno => new AlumnoGetDto{
+					ID = alumno.ID,
+					Name = alumno.Name
+				}).ToListAsync();
+			if (alumnosDto == null){
+				return NotFound(new { message = "No existe ningún alumno"});
+			}
+
+			return Ok(alumnosDto);
+		}
+
+		[HttpPost("Create")]
+		public async Task<ActionResult<Alumno>> PostAlumno([FromQuery] AlumnoCreateDto dto){
 			var alumno = new Alumno{
 				Name = dto.Name,
 				CursoID = dto.CursoID
 			};
+			if (alumno.CursoID == null){
+				return NotFound(new { message = "No se encontró la id del curso"});
+			}
 
 			_context.Alumnos.Add(alumno);
 			await _context.SaveChangesAsync();
 			return CreatedAtAction(nameof(GetAlumnos), new {id = alumno.ID}, alumno);
 		}
-		
-		[HttpDelete("{id}")]
-		public async Task<IActionResult> DeleteAlumno(int id, [FromBody] AlumnoDeleteDto request){
 
+		
+		[HttpDelete("delete")]
+		public async Task<IActionResult> DeleteAlumno([FromQuery] AlumnoDeleteDto request){
 			if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, _config["AdminConfig:AdminHash"])){
 				return Unauthorized(new { message = "Acceso denegado, te faltan permisos."});
 			}
-			var alumno = await _context.Alumnos.FindAsync(id);
+
+			var alumno = await _context.Alumnos.FindAsync(request.ID);
 			if (alumno == null){
 				return NotFound(new { message = "No se encontró ningún alumno con esa ID"});
 			}
