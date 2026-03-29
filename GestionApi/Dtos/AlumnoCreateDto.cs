@@ -12,4 +12,8 @@ namespace GestionApi.Dtos
 		required public int ID {get; set;}
 		required public string Password {get; set;} = "";
 	}
+	public class AlumnoUpdateDto{
+		public string? Name {get; set;}
+		public int? CursoID {get; set;}
+	}
 }

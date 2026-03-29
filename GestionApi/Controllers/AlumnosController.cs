@@ -34,8 +34,14 @@ namespace GestionApi.Controllers{
 						
 			return Ok(alumnoDto);
 		}
+		[HttpDelete("reset-database")]
+		public async Task<ActionResult> ResetAlumnos(){
+			await _context.Database.ExecuteSqlRawAsync($"ALTER SEQUENCE \"Alumnos_ID_Seq\" RESTART WITH 1;");
 
-		[HttpGet("List")]
+			return Ok(new { message = "Tabla limpia y contador = 1"});
+		}
+
+		[HttpGet("list")]
 		public async Task<ActionResult<List<Alumno>>> ListAllAlumnos(){
 			var alumnosDto = await _context.Alumnos
 				.Select(alumno => new AlumnoGetDto{
@@ -49,13 +55,13 @@ namespace GestionApi.Controllers{
 			return Ok(alumnosDto);
 		}
 
-		[HttpPost("Create")]
-		public async Task<ActionResult<Alumno>> PostAlumno([FromQuery] AlumnoCreateDto dto){
+		[HttpPost]
+		public async Task<ActionResult<Alumno>> PostAlumno([FromBody] AlumnoCreateDto dto){
 			var alumno = new Alumno{
 				Name = dto.Name,
 				CursoID = dto.CursoID
 			};
-			if (alumno.CursoID == null){
+			if (alumno.CursoID == null || alumno.CursoID == 0){
 				return NotFound(new { message = "No se encontró la id del curso"});
 			}
 
@@ -64,6 +70,31 @@ namespace GestionApi.Controllers{
 			return CreatedAtAction(nameof(GetAlumnos), new {id = alumno.ID}, alumno);
 		}
 
+		[HttpPut("{id}")]
+		public async Task<IActionResult> PutAlumno([FromRoute] int id, [FromBody] AlumnoUpdateDto dto){
+			var alumno = await _context.Alumnos.FindAsync(id);
+			if (alumno == null){
+				return NotFound(new { message = "No se encontró ningún alumno con esa ID"});
+			}
+			if (dto.Name != null){
+				if (string.IsNullOrWhiteSpace(dto.Name)){
+					return BadRequest("Nombre Inválido");
+				}
+				alumno.Name = dto.Name;
+			}
+			else{
+				dto.Name = alumno.Name;
+			}
+
+			if (dto.CursoID.HasValue){
+				alumno.CursoID = dto.CursoID.Value;
+			}
+
+			await _context.SaveChangesAsync();
+			return Ok(alumno);
+
+			
+		}
 		
 		[HttpDelete("delete")]
 		public async Task<IActionResult> DeleteAlumno([FromQuery] AlumnoDeleteDto request){
