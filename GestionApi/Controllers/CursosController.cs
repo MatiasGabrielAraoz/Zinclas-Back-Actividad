@@ -27,32 +27,62 @@ namespace GestionApi.Controllers{
 				return NotFound(new { message = "No se encontró un curso con esa id"});
 			}
 			CursosGetDto cursoDto = new CursosGetDto{
-				Name = curso.Name,
+				año = curso.año,
 				ID = curso.ID
 			};
 			return Ok(cursoDto);
 		}
 
-		[HttpPost]
-		public async Task<ActionResult<Curso>> CrearCurso([FromQuery] CursosCreateDto dto){
-			
-			var cursoexistente = await _context.Cursos.AnyAsync(
-				a => a.ID == dto.ID
+		[HttpPost("curso")]
+		public async Task<ActionResult<Curso>> CreateCurso([FromBody] CursosCreateDto dto){
+			var curso = await _context.Cursos.FirstOrDefaultAsync(
+				c => c.año == dto.año && c.division == dto.division 
 			);
 
+			if (curso != null){
+				return BadRequest(new { message = "Ya existe un curso con ese año o división"});
+			}
+			
 			Curso cursocreated = new Curso{
-				Name = dto.Name,
-				ID = dto.ID
+				año = dto.año,
+				division = dto.division
 			};
 
 			await _context.Cursos.AddAsync(cursocreated);
 			await _context.SaveChangesAsync();
+
 			return Ok(cursocreated);
 			
 		}
+		[HttpDelete]
+		public async Task<IActionResult> DeleteCurso([FromQuery] CursosDeleteDto request){
+			if (string.IsNullOrEmpty(request.password) || !BCrypt.Net.BCrypt.Verify(request.password, _config["AdminConfig:AdminHash"])){
+				return Unauthorized(new { message = "Contraseña incorrecta, no podés eliminar un curso"});
+			}
+			var curso = await _context.Cursos.FindAsync(request.año, request.division);
+			if (curso == null){
+				return BadRequest(new { message = "No se encontró ningún curso con ese año y división"});
+			}
+
+			_context.Cursos.Remove(curso);
+			await _context.SaveChangesAsync();
+			return NoContent();
+		}
+
+		[HttpPut("{id}")]
+		public async Task<ActionResult<Curso>> UpdateCurso(int id, [FromQuery] CursosUpdateDto dto){
+			if (dto.id != id) return BadRequest(new { message = "La id indicada por el cuerpo no coincide con el ID de la solicitud"});
+			var curso = await _context.Cursos.FindAsync(dto.id);
+			if (curso == null){
+				return BadRequest(new { message = "No se encontró ningún curso con esa id"});
+			}
+			curso.año = dto.año ?? curso.año;
+			curso.division = dto.division ?? curso.division;
+
+			await _context.SaveChangesAsync();
+			return Ok();
+
+
+		}
 	}
-
-
-
-
 }

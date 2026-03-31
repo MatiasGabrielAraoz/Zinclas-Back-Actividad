@@ -70,5 +70,9 @@ namespace GestionApi.Controllers{
 				asistencia
 			);
 		}
+		[HttpDelete]
+		public async Task<ActionResult<Asistencia>> DeleteAsistencia([]){
+
+		}
 	}
 }
