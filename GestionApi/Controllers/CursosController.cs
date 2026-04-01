@@ -33,7 +33,7 @@ namespace GestionApi.Controllers{
 			return Ok(cursoDto);
 		}
 
-		[HttpPost("curso")]
+		[HttpPost]
 		public async Task<ActionResult<Curso>> CreateCurso([FromBody] CursosCreateDto dto){
 			var curso = await _context.Cursos.FirstOrDefaultAsync(
 				c => c.año == dto.año && c.division == dto.division 
@@ -81,8 +81,6 @@ namespace GestionApi.Controllers{
 
 			await _context.SaveChangesAsync();
 			return Ok();
-
-
 		}
 	}
 }

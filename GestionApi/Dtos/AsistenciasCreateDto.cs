@@ -13,6 +13,7 @@ public class AsistenciasGetDto{
 public class AsistenciasDeleteDto{
 	public int AlumnoID {get; set;}
 	public DateTime Fecha {get; set;}
+	public string password {get; set;} = "";
 }
 public class AsistenciasUpdateDto{
 	public DateTime Fecha {get; set;}

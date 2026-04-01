@@ -41,7 +41,7 @@ namespace GestionApi.Controllers{
 			return Ok(new { message = "Tabla limpia y contador = 1"});
 		}
 
-		[HttpGet("list")]
+		[HttpGet]
 		public async Task<ActionResult<List<Alumno>>> ListAllAlumnos(){
 			var alumnosDto = await _context.Alumnos
 				.Select(alumno => new AlumnoGetDto{
@@ -96,7 +96,7 @@ namespace GestionApi.Controllers{
 			
 		}
 		
-		[HttpDelete("delete")]
+		[HttpDelete]
 		public async Task<IActionResult> DeleteAlumno([FromQuery] AlumnoDeleteDto request){
 			if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, _config["AdminConfig:AdminHash"])){
 				return Unauthorized(new { message = "Acceso denegado, te faltan permisos."});
