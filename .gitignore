@@ -1,1 +1,3 @@
-./GestionApi/appsettings.json
+**/appsettings.json
+**/bin
+**/obj
