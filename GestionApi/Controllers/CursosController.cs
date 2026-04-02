@@ -28,6 +28,7 @@ namespace GestionApi.Controllers{
 			}
 			CursosGetDto cursoDto = new CursosGetDto{
 				año = curso.año,
+				division = curso.division,
 				ID = curso.ID
 			};
 			return Ok(cursoDto);

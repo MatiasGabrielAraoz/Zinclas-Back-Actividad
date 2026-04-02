@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-
+using System.Text.Json.Serialization;
 namespace GestionApi.Dtos;
 
 public class CursosGetDto{
+	[JsonPropertyName("id")]
 	public int ID {get; set;}
 	[Range(1,7)]
 	public int año {get; set;}

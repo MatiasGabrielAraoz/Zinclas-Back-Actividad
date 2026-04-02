@@ -1,7 +1,7 @@
 namespace GestionApi.Dtos
 {
 	public class AlumnoCreateDto{
-		public string Name {get; set;}
+		public string Name {get; set;} = "";
 		public int CursoID {get; set;}
 	}
 	public class AlumnoGetDto{
