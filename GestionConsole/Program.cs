@@ -1,5 +1,6 @@
 ﻿using GestionApiClient;
 using GestionConsole.Handlers.AlumnsHandler;
+using GestionConsole.Handlers.CoursesHandler;
 
 public class GestionApiConsole{
 
@@ -12,7 +13,7 @@ public class GestionApiConsole{
 
 		ZinclasClient client = new ZinclasClient("http://localhost:5019/");
 		CourseHandler courseHandler = new CourseHandler(client);
-		AsistenciaHandler asistenciaHandler = new AsistenciaHandler(client);
+		AlumnoHandler alumnHandler = new AlumnoHandler(client);
 
 		Console.WriteLine("Cliente iniciado");
 		while (true){
@@ -38,7 +39,8 @@ public class GestionApiConsole{
 			string accion = inputSplitted[1].ToLower();
 			var flags = ParseFlags(inputSplitted);
 			switch (tabla){
-				case ("estudiantes"):
+				case ("alumno"):
+					await alumnHandler.Handle(accion, flags);
 					break;
 				case ("curso"):
 					await courseHandler.Handle(accion, flags);
