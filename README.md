@@ -7,15 +7,25 @@ Para cumplir con este ejercicio tienen que crear un pequeño sistema que permita
     Obtener un curso específico <br>
     Crear cursos <br>
     Eliminar cursos <br>
-- Alumnos <br>
+- Alumnos: <br>
     Obtener todos los alumnos <br>
     Obtener un alumno específico <br>
     Crear alumnos <br>
     Eliminar alumnos <br>
     Cambiar de información de alumnos <br>
-- Asistencias <br>
+- Asistencias: <br>
     Obtener las asistencias de un alumno en x día <br>
     Obtener el porcentaje de asistencias de un alumno a lo largo del año junto a su cantidad de presentes y ausentes <br>
     Registrar asistencia de un alumno en x día <br>
+    Eliminar la asistencia de un alumno en x día <br>
+    Modificar la asistencia de un alumno en x día en caso de un error o justificación <br>
+## Estructura
+- GestionApi: <br>
+    Se encarga de manejar la persistencia de los datos en PostgreSQL usando Entity Framework Core <br>
+    Utiliza DTOs para enviar información para evitar exponer información sensible de la base de datos <br>
+- GestionApiClient: <br>
+    Es una librería que se encarga de gestionar la interacción con la api creando funciones para facilitar la interacción con la api <br>
+- GestionApiConsole: <br>
+    Es una aplicación de consola que usando la librería del cliente permite la interacción con la api desde una consola con comandos simples
 
 
