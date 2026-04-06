@@ -8,10 +8,11 @@ public class AlumnoHandler{
 	public AlumnoHandler(ZinclasClient client){
 		_client = client;
 	}
+
 	public async Task Handle(string accion, Dictionary<string, string> flags){
+
 		switch (accion){
-			case "post":
-				//TODO: extraer diccionario y llamar a _client.PostAsistenciaAsync
+			case "post" or "create":
 				try {
 					await _client.CreateAlumnAsync(flags["name"], int.Parse(flags["cursoid"]));
 				}
@@ -21,34 +22,56 @@ public class AlumnoHandler{
 				break;
 
 			case "get":
-				//TODO: extraer diccionario y llamar a _client.GetAsistenciaAsync
 				try {
 					var alumn = await _client.GetAlumnAsync(int.Parse(flags["id"]));
-					Console.WriteLine($"IDCurso: {alumn.ID}");
+					Console.WriteLine(
+						"----------------------\n"+
+						$"Nombre: {alumn.Name}\n"+
+						$"ID: {alumn.ID}\n"+ 
+						$"CursoID: {alumn.CursoID}\n"+
+						$"Año: {alumn.año}\n" +
+						$"Division: {alumn.division}\n" +
+						"----------------------\n"
+					);
 				}
 				catch {
 					var alumns = await _client.GetAlumnsAsync();
 					foreach (var alumn in alumns){
 						Console.WriteLine(
-								"----------------------\n"+
-								$"CursoID: {alumn.CursoID}\n"+
-								$"Nombre: {alumn.Name}\n"+
-								"----------------------\n"
+							"----------------------\n"+
+							$"CursoID: {alumn.CursoID}\n"+
+							$"Nombre: {alumn.Name}\n"+
+							$"ID: {alumn.ID}\n"+ 
+							$"Año: {alumn.año}\n" +
+							$"Division: {alumn.division}\n" +
+							"----------------------\n"
 						);
 					}
 				}
 				break;
-			case "update":
+
+			case "update" or "put":
 				try {
 					await _client.UpdateAlumnAsync(int.Parse(flags["id"]), int.Parse(flags["cursoid"]), flags["name"]);
-					
+					Console.WriteLine("Alumno actualizado correctamente");
 				}
 				catch {
-
+					Console.WriteLine("Formato incorrecto, debes usar las flags --name=nombre, --cursoid=numero y --id=numero");
 				}
 				break;
+
+			case "delete":
+				try {
+					await _client.DeleteAlumnAsync(int.Parse(flags["id"]), flags["pass"]);
+				}
+				catch {
+					Console.WriteLine("Formato incorrecto, debes usar las flags --id=numero, y --");
+					
+				}
+				break;
+
 			default:
-				Console.WriteLine($"acción '{accion}' no es válida para asistencias");
+				Console.WriteLine($"acción '{accion}' no es válida para alumnos");
 				break;
 		}
 	}

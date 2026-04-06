@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using DotNetEnv;
 using System.Linq;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +10,11 @@ using GestionApi.Dtos;
 namespace GestionApi.Controllers{
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AlumnosController : ControllerBase{
+	public class alumnosController : ControllerBase{
 		private readonly AppDbContext _context;
 		private readonly IConfiguration _config;
 
-		public AlumnosController(AppDbContext context, IConfiguration config){
+		public alumnosController(AppDbContext context, IConfiguration config){
 			_context = context; 
 			_config = config;
 		}
@@ -21,22 +22,30 @@ namespace GestionApi.Controllers{
 		[HttpGet("{id}")]
 		public async Task<ActionResult<Alumno>> GetAlumnos([FromRoute] int id){
 			var alumno = await _context.Alumnos
-				.Include(a => a.Curso)
 				.FirstOrDefaultAsync(a => a.ID == id);
 			if (alumno == null){
 				return NotFound(new { message = "No se encontró el alumno"});
 			}
 			
+			var curso = await _context.Cursos.FirstOrDefaultAsync(c => c.ID == alumno.ID);
 			var alumnoDto = new AlumnoGetDto{
 				Name = alumno.Name,
-				ID = alumno.ID
+				ID = alumno.ID,
+				CursoID = alumno.CursoID,
+				año = alumno.año,
+				division = alumno.division				
 			};
 						
 			return Ok(alumnoDto);
 		}
 		[HttpDelete("reset-database")]
 		public async Task<ActionResult> ResetAlumnos(){
-			await _context.Database.ExecuteSqlRawAsync($"ALTER SEQUENCE \"Alumnos_ID_Seq\" RESTART WITH 1;");
+			await _context.Database.ExecuteSqlRawAsync($"ALTER SEQUENCE \"Alumnos_ID_seq\" RESTART WITH 1;");
+			var alumns = await _context.Alumnos.ToListAsync();
+			foreach (var alumn in alumns){
+				_context.Alumnos.Remove(alumn);
+			}
+			await _context.SaveChangesAsync();
 
 			return Ok(new { message = "Tabla limpia y contador = 1"});
 		}
@@ -46,27 +55,36 @@ namespace GestionApi.Controllers{
 			var alumnosDto = await _context.Alumnos
 				.Select(alumno => new AlumnoGetDto{
 					ID = alumno.ID,
-					Name = alumno.Name
+					Name = alumno.Name,
+					CursoID = alumno.CursoID		
 				}).ToListAsync();
 			if (alumnosDto == null){
 				return NotFound(new { message = "No existe ningún alumno"});
 			}
 
+			foreach (var alumno in alumnosDto){
+				var cursos = await _context.Cursos.FirstOrDefaultAsync(c => c.ID == alumno.ID);
+			}
 			return Ok(alumnosDto);
 		}
 
 		[HttpPost]
 		public async Task<ActionResult<Alumno>> PostAlumno([FromBody] AlumnoCreateDto dto){
+			var cursoExists = await _context.Cursos.AnyAsync(c => c.ID == dto.CursoID);
+			if (!cursoExists){
+				return NotFound(new { message = "No se encontró ningún curso con esa id"});
+			}
+			var curso = await _context.Cursos.FirstOrDefaultAsync(c => c.ID == dto.CursoID);
 			var alumno = new Alumno{
 				Name = dto.Name,
-				CursoID = dto.CursoID
+				CursoID = dto.CursoID,
+				año = curso.año,
+				division = curso.division
 			};
-			if (alumno.CursoID == null || alumno.CursoID == 0){
-				return NotFound(new { message = "No se encontró la id del curso"});
-			}
 
 			_context.Alumnos.Add(alumno);
 			await _context.SaveChangesAsync();
+
 			return CreatedAtAction(nameof(GetAlumnos), new {id = alumno.ID}, alumno);
 		}
 
@@ -98,7 +116,8 @@ namespace GestionApi.Controllers{
 		
 		[HttpDelete]
 		public async Task<IActionResult> DeleteAlumno([FromQuery] AlumnoDeleteDto request){
-			if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, _config["AdminConfig:AdminHash"])){
+			string adminHash = Env.GetString("ADMIN_PASSWORD");
+			if (string.IsNullOrEmpty(request.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, adminHash)){
 				return Unauthorized(new { message = "Acceso denegado, te faltan permisos."});
 			}
 

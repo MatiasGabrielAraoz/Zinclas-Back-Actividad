@@ -16,7 +16,10 @@ public class GestionApiConsole{
 		AlumnoHandler alumnHandler = new AlumnoHandler(client);
 
 		Console.WriteLine("Cliente iniciado");
-		while (true){
+
+		bool running = true;
+
+		while (running){
 			Console.Write("> ");
 			String? input = Console.ReadLine();
 			if (string.IsNullOrWhiteSpace(input)) {
@@ -26,8 +29,15 @@ public class GestionApiConsole{
 			String[] inputSplitted = input.ToString().Split(" ", StringSplitOptions.RemoveEmptyEntries);
 		
 			string tabla = inputSplitted[0].ToLower();
-			if (tabla == "exit" || tabla == "quit"){ 
+			List<String> exitCommands = ["exit", "quit", "salir"];
+			foreach (String exitCommand in exitCommands){
+				if (tabla == exitCommand){
 				Console.WriteLine("Saliendo...");
+				running = false;
+				break;
+				}
+			}
+			if (running == false){
 				break;
 			}
 
@@ -36,18 +46,26 @@ public class GestionApiConsole{
 				DisplayExample();
 				continue;
 			}
+
 			string accion = inputSplitted[1].ToLower();
 			var flags = ParseFlags(inputSplitted);
 			switch (tabla){
-				case ("alumno"):
+				case "alumno" or "alumnos":
 					await alumnHandler.Handle(accion, flags);
 					break;
-				case ("curso"):
+
+				case "curso" or "cursos":
 					await courseHandler.Handle(accion, flags);
 					break;
-				default:
-					Console.WriteLine("Esa tabla no existe");
+
+				case "asistencia" or "asistencias":
+					Console.WriteLine("Work in progress");
 					break;
+
+				default:
+					Console.WriteLine("Esa tabla no existe, las tablas disponibles son: alumnos, cursos y asistencias");
+					break;
+
 			}		
 		}
 	}

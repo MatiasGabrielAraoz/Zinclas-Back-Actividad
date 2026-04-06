@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using DotNetEnv;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using GestionApi.Data;
@@ -17,20 +18,34 @@ namespace GestionApi.Controllers{
 			_context = context;
 			_config = config;
 		}
+		[HttpGet]
+		public async Task<ActionResult<Curso>> GetCursos(){
+			var cursos = await _context.Cursos.ToListAsync();
+
+			var courses = cursos.Select(c => new CursosGetDto {
+				ID = c.ID,
+				año = c.año,
+				division = c.division				
+			}).ToList();
+
+			return Ok(courses);
+		}
 
 		[HttpGet("{id}")]
 		public async Task<ActionResult<Curso>> GetCurso([FromRoute] int id){
 			var curso = await _context.Cursos
-				.Include(a => a.Alumnos)
 				.FirstOrDefaultAsync(a => a.ID == id);
+
 			if (curso == null){
 				return NotFound(new { message = "No se encontró un curso con esa id"});
 			}
+
 			CursosGetDto cursoDto = new CursosGetDto{
 				año = curso.año,
 				division = curso.division,
 				ID = curso.ID
 			};
+
 			return Ok(cursoDto);
 		}
 
@@ -56,11 +71,13 @@ namespace GestionApi.Controllers{
 			
 		}
 		[HttpDelete]
-		public async Task<IActionResult> DeleteCurso([FromQuery] CursosDeleteDto request){
-			if (string.IsNullOrEmpty(request.password) || !BCrypt.Net.BCrypt.Verify(request.password, _config["AdminConfig:AdminHash"])){
+		public async Task<IActionResult> DeleteCurso([FromBody] CursosDeleteDto request){
+			string adminHash = Env.GetString("ADMIN_PASSWORD");
+
+			if (string.IsNullOrEmpty(request.password) || !BCrypt.Net.BCrypt.Verify(request.password, adminHash)){
 				return Unauthorized(new { message = "Contraseña incorrecta, no podés eliminar un curso"});
 			}
-			var curso = await _context.Cursos.FindAsync(request.año, request.division);
+			var curso = await _context.Cursos.FirstOrDefaultAsync(c => c.año == request.año && c.division == request.division);
 			if (curso == null){
 				return BadRequest(new { message = "No se encontró ningún curso con ese año y división"});
 			}
@@ -71,12 +88,14 @@ namespace GestionApi.Controllers{
 		}
 
 		[HttpPut("{id}")]
-		public async Task<ActionResult<Curso>> UpdateCurso(int id, [FromQuery] CursosUpdateDto dto){
+		public async Task<ActionResult<Curso>> UpdateCurso([FromRoute] int id, [FromBody] CursosUpdateDto dto){
 			if (dto.id != id) return BadRequest(new { message = "La id indicada por el cuerpo no coincide con el ID de la solicitud"});
+
 			var curso = await _context.Cursos.FindAsync(dto.id);
 			if (curso == null){
 				return BadRequest(new { message = "No se encontró ningún curso con esa id"});
 			}
+
 			curso.año = dto.año ?? curso.año;
 			curso.division = dto.division ?? curso.division;
 
