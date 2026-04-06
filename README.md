@@ -14,8 +14,8 @@ Para cumplir con este ejercicio tienen que crear un pequeño sistema que permita
     Eliminar alumnos
     Cambiar de información de alumnos
 - Asistencias
-    Obtener las asistencias de un alumno en x día \\
-    Obtener el porcentaje de asistencias de un alumno a lo largo del año junto a su cantidad de presentes y ausentes \\
-    Registrar asistencia de un alumno en x día \\
+    Obtener las asistencias de un alumno en x día <br>
+    Obtener el porcentaje de asistencias de un alumno a lo largo del año junto a su cantidad de presentes y ausentes <br>
+    Registrar asistencia de un alumno en x día <br>
 
 
