@@ -31,6 +31,33 @@ namespace GestionApi.Controllers{
 			return Ok(asistencia);
 
 		}
+		[HttpGet("{id}")]
+		public async Task<ActionResult<AsistenciasResumenDto>> GetResumenAlumno([FromRoute] int id){
+			var asistencias = await _context.Asistencias
+				.Include(a => a.AlumnoID == id)
+				.ToListAsync();
+			int Presentes = 0;
+			int Ausentes = 0;
+			
+			foreach (var asistencia in asistencias){
+				if (asistencia.Presente){
+					Presentes++;
+				}				
+				else {
+					Ausentes++;
+				}
+			}
+			int total = Presentes + Ausentes;
+			int porcentajePromedio = (Presentes / total) * 100;
+			AsistenciasResumenDto resumen = new AsistenciasResumenDto{
+				presentes = Presentes,
+				ausentes = Ausentes,
+				porcentajePresencias = porcentajePromedio
+			};
+
+			return Ok(resumen);
+		}
+
 
 		
 
@@ -41,22 +68,22 @@ namespace GestionApi.Controllers{
 				return BadRequest(new { message = "El formato de la fecha no es válido, se usa YYYY-MM-DD"});
 			}
 
-			var alumno = await _context.Alumnos.FindAsync(asistenciaDto.AlumnoID);
+			var alumno = await _context.Alumnos.FindAsync(asistenciaDto.alumnoID);
 			if (alumno == null){
 				return NotFound(new { message = "No se encontró ningún alumno con esa ID"});
 			}
 
 			var AlreadyExistsThisDate = await _context.Asistencias.AnyAsync(a =>
-				a.AlumnoID == asistenciaDto.AlumnoID && a.Fecha.Date == asistenciaDto.Fecha.Date
+				a.AlumnoID == asistenciaDto.alumnoID && a.Fecha.Date == asistenciaDto.fecha.Date
 			);
 			if (AlreadyExistsThisDate){
 				return BadRequest(new { message = "Ya está definida una asistencia en esta fecha"});
 			}
 
 			var asistencia = new Asistencia{
-				Fecha = asistenciaDto.Fecha,
-				AlumnoID = asistenciaDto.AlumnoID,
-				Presente = asistenciaDto.Presente
+				Fecha = asistenciaDto.fecha,
+				AlumnoID = asistenciaDto.alumnoID,
+				Presente = asistenciaDto.presente
 			};
 
 			_context.Asistencias.Add(asistencia);
@@ -79,8 +106,8 @@ namespace GestionApi.Controllers{
 				return Unauthorized(new { message = "La contraseña es incorrecta" });
 			}
 			var asistencia = await _context.Asistencias.FirstOrDefaultAsync(a =>
-				a.AlumnoID == request.AlumnoID &&
-				a.Fecha == request.Fecha
+				a.AlumnoID == request.alumnoID &&
+				a.Fecha == request.fecha
 			);
 			if (asistencia == null) return NotFound(new { message = "No se registró ninguna asistencia de ese alumno ese día"});
 			_context.Asistencias.Remove(asistencia);
@@ -91,16 +118,16 @@ namespace GestionApi.Controllers{
 		[HttpPut]
 		public async Task<ActionResult<Asistencia>> UpdateAsistencia([FromQuery] AsistenciasUpdateDto dto){
 			var asistenciaCambiar = await _context.Asistencias.FirstOrDefaultAsync(a => 
-				a.AlumnoID == dto.AlumnoID && 
-				a.Fecha == dto.Fecha
+				a.AlumnoID == dto.alumnoID && 
+				a.Fecha == dto.fecha
 			);
 			if (asistenciaCambiar == null) return NotFound(new {message = "No se registró ninguna asistencia de ese alumno ese dia para cambiar"});
-			if (dto.Presente == null) return BadRequest(new { message = "Necesitas especificar el valor a cambiar"});
+			if (dto.presente == null) return BadRequest(new { message = "Necesitas especificar el valor a cambiar"});
 
 			asistenciaCambiar = new Asistencia{
 				AlumnoID = asistenciaCambiar.AlumnoID,
 				Fecha = asistenciaCambiar.Fecha,
-				Presente = dto.Presente.Value,
+				Presente = dto.presente.Value,
 			};
 
 			await _context.SaveChangesAsync();
