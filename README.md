@@ -36,6 +36,7 @@ Para cumplir con este ejercicio tienen que crear un pequeño sistema que permita
     Es una aplicación de consola que usando la librería del cliente permite la interacción con la api desde una consola con comandos simples
 
 ## Como instalarlo
+Aclaraciones: debes tener una base de datos en postgreSQL de nombre ZinclasDB, proximamente se le añadirá una imagen de docker que automatice este proceso y elimine dependencias para facilitar la instalación.
 ```
 # 1. Clonar el repo
 git clone https://github.com/MatiasGabrielAraoz/Zinclas-Back-Actividad
