@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseNpgsql(connectionString));
 builder.Services.AddHealthChecks()
-	.AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
+	.AddNpgSql(connectionString);
 var app = builder.Build();
 
 app.MapHealthChecks("/health");

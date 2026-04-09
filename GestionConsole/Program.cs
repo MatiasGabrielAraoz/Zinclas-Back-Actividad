@@ -31,7 +31,10 @@ public class GestionApiConsole{
 		while (running){
 			bool urlIsValid = await client.CheckUrlHealth();
 			if (!urlIsValid){
-				Console.WriteLine("No se pudo conectar con la api en la url configurada, iniciando en modo seguro, puedes cambiar la url con apiurl --url=");
+				Console.WriteLine("No se pudo conectar con la api en la url configurada, iniciando en modo seguro, puedes cambiar la url con \"apiurl --url=\"");
+			}
+			else {
+				Console.WriteLine("Se Conectó a la api correctamente.");
 			}
 			Console.Write("> ");
 			String? input = Console.ReadLine();
@@ -81,8 +84,7 @@ public class GestionApiConsole{
 					catch{
 				
 					}
-
-
+					break;
 				default:
 					Console.WriteLine("Esa tabla no existe, las tablas disponibles son: alumnos, cursos y asistencias");
 					break;
