@@ -21,9 +21,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseNpgsql(connectionString));
-
+builder.Services.AddHealthChecks()
+	.AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection")!);
 var app = builder.Build();
 
+app.MapHealthChecks("/health");
 
 
 if (app.Environment.IsDevelopment()){

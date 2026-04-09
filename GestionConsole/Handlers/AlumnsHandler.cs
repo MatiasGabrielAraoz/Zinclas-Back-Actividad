@@ -15,6 +15,7 @@ public class AlumnoHandler{
 			case "post" or "create":
 				try {
 					await _client.CreateAlumnAsync(flags["name"], int.Parse(flags["cursoid"]));
+					Console.WriteLine("Alumno creado correctamente.");
 				}
 				catch {
 					Console.WriteLine("Formato incorrecto, debes usar las flags --name=nombre y --id=numero");
@@ -65,7 +66,7 @@ public class AlumnoHandler{
 					await _client.DeleteAlumnAsync(int.Parse(flags["id"]), flags["pass"]);
 				}
 				catch {
-					Console.WriteLine("Formato incorrecto, debes usar las flags --id=numero, y --");
+					Console.WriteLine("Formato incorrecto, debes usar las flags --id=numero, y --pass=contraseña por seguridad");
 					
 				}
 				break;

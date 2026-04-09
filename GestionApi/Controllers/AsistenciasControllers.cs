@@ -34,7 +34,7 @@ namespace GestionApi.Controllers{
 		[HttpGet("{id}")]
 		public async Task<ActionResult<AsistenciasResumenDto>> GetResumenAlumno([FromRoute] int id){
 			var asistencias = await _context.Asistencias
-				.Include(a => a.AlumnoID == id)
+				.Where(a => a.AlumnoID == id)
 				.ToListAsync();
 			int Presentes = 0;
 			int Ausentes = 0;
@@ -47,8 +47,10 @@ namespace GestionApi.Controllers{
 					Ausentes++;
 				}
 			}
+
 			int total = Presentes + Ausentes;
 			int porcentajePromedio = (Presentes / total) * 100;
+
 			AsistenciasResumenDto resumen = new AsistenciasResumenDto{
 				presentes = Presentes,
 				ausentes = Ausentes,

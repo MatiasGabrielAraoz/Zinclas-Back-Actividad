@@ -23,5 +23,5 @@ public class AsistenciasUpdateDto{
 public class AsistenciasResumenDto{
 	public int presentes {get; set;}
 	public int ausentes {get; set;}
-	public int promedioPresencias {get; set;}
+	public int porcentajePresencias {get; set;}
 }

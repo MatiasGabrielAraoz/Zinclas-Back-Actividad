@@ -1,6 +1,13 @@
-﻿using GestionApiClient;
+﻿using System.Text.Json;
+using GestionApiClient;
+using GestionConsole.ConfigManager;
 using GestionConsole.Handlers.AlumnsHandler;
 using GestionConsole.Handlers.CoursesHandler;
+
+
+public class AppConfig{
+	public string ApiUrl {get; set;} = string.Empty;
+}
 
 public class GestionApiConsole{
 
@@ -8,10 +15,12 @@ public class GestionApiConsole{
 		Console.CancelKeyPress += (sender, e) => {
 			Console.Write("\nSaliendo... \n");
 		};
-
 		Console.WriteLine("Iniciando Cliente");
 
-		ZinclasClient client = new ZinclasClient("http://localhost:5019/");
+		AppConfig appConfig = ConfigManager.Load();
+
+		ZinclasClient client = new ZinclasClient(appConfig.ApiUrl);
+
 		CourseHandler courseHandler = new CourseHandler(client);
 		AlumnoHandler alumnHandler = new AlumnoHandler(client);
 
@@ -20,6 +29,10 @@ public class GestionApiConsole{
 		bool running = true;
 
 		while (running){
+			bool urlIsValid = await client.CheckUrlHealth();
+			if (!urlIsValid){
+				Console.WriteLine("No se pudo conectar con la api en la url configurada, iniciando en modo seguro, puedes cambiar la url con apiurl --url=");
+			}
 			Console.Write("> ");
 			String? input = Console.ReadLine();
 			if (string.IsNullOrWhiteSpace(input)) {
@@ -61,6 +74,14 @@ public class GestionApiConsole{
 				case "asistencia" or "asistencias":
 					Console.WriteLine("Work in progress");
 					break;
+				case "apiurl":
+					try{
+						
+					}
+					catch{
+				
+					}
+
 
 				default:
 					Console.WriteLine("Esa tabla no existe, las tablas disponibles son: alumnos, cursos y asistencias");
