@@ -20,7 +20,7 @@ namespace GestionApi.Controllers{
 
 
 		[HttpGet]
-		public async Task<ActionResult<Asistencia>> GetAsistencia([FromQuery] int AlumnoID, DateTime Fecha){
+		public async Task<ActionResult<Asistencia>> GetAsistencia([FromQuery] int AlumnoID, [FromBody] DateTime Fecha){
 			var asistencia = await _context.Asistencias
 				.FirstOrDefaultAsync(a => a.AlumnoID == AlumnoID && a.Fecha.Date == Fecha.Date);
 

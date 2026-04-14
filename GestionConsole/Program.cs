@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.RegularExpressions;
+using System.Text.Json;
 using GestionApiClient;
 using GestionConsole.ConfigManager;
 using GestionConsole.Handlers.AlumnsHandler;
@@ -17,12 +18,14 @@ public class GestionApiConsole{
 		};
 		Console.WriteLine("Iniciando Cliente");
 
+		ConfigManager configManager = new ConfigManager();
 		AppConfig appConfig = ConfigManager.Load();
 
 		ZinclasClient client = new ZinclasClient(appConfig.ApiUrl);
 
 		CourseHandler courseHandler = new CourseHandler(client);
 		AlumnoHandler alumnHandler = new AlumnoHandler(client);
+		AsistenciaHandler asistanceHandler = new AsistenciaHandler(client);
 
 		Console.WriteLine("Cliente iniciado");
 
@@ -33,19 +36,24 @@ public class GestionApiConsole{
 			if (!urlIsValid){
 				Console.WriteLine("No se pudo conectar con la api en la url configurada, iniciando en modo seguro, puedes cambiar la url con \"apiurl --url=\"");
 			}
-			else {
-				Console.WriteLine("Se Conectó a la api correctamente.");
-			}
+
 			Console.Write("> ");
 			String? input = Console.ReadLine();
 			if (string.IsNullOrWhiteSpace(input)) {
 				DisplayExample();
 				continue;
 			}
-			String[] inputSplitted = input.ToString().Split(" ", StringSplitOptions.RemoveEmptyEntries);
-		
+			var regexInput = Regex.Matches(input, @"[^\s""]+|""([^""]*)""");
+			String[] inputSplitted = regexInput.Select(p => {
+				if (p.Groups[1].Success){
+					return p.Groups[1].Value;
+				}
+				return p.Value;
+			}).ToArray();
+
 			string tabla = inputSplitted[0].ToLower();
 			List<String> exitCommands = ["exit", "quit", "salir"];
+
 			foreach (String exitCommand in exitCommands){
 				if (tabla == exitCommand){
 				Console.WriteLine("Saliendo...");
@@ -64,7 +72,9 @@ public class GestionApiConsole{
 			}
 
 			string accion = inputSplitted[1].ToLower();
-			var flags = ParseFlags(inputSplitted);
+			var skip = (tabla == "apiurl") ? 1 : 2;
+
+			var flags = ParseFlags(inputSplitted, skip);
 			switch (tabla){
 				case "alumno" or "alumnos":
 					await alumnHandler.Handle(accion, flags);
@@ -77,14 +87,12 @@ public class GestionApiConsole{
 				case "asistencia" or "asistencias":
 					Console.WriteLine("Work in progress");
 					break;
+
 				case "apiurl":
-					try{
-						
-					}
-					catch{
-				
-					}
+					Console.WriteLine($"url: {flags["url"]}");
+					await configManager.ApiUrl(appConfig, client, flags["url"]);
 					break;
+
 				default:
 					Console.WriteLine("Esa tabla no existe, las tablas disponibles son: alumnos, cursos y asistencias");
 					break;
@@ -98,13 +106,13 @@ public class GestionApiConsole{
 			Console.WriteLine("Ej: estudiante PUT --AlumnoID=10 --CursoID=2");
 			Console.WriteLine("Ej: curso PUT --Año=1 --Division=2 ");
 	}
-	private static Dictionary<string, string> ParseFlags(String[] args){
+	private static Dictionary<string, string> ParseFlags(String[] args, int skip){
 		var flags = new Dictionary<string, string>();
 
-		foreach (var arg in args.Skip(2)){
+		foreach (var arg in args.Skip(skip)){
 			if (arg.StartsWith("--") && arg.Contains("=")){
-				var part = arg.Split("=", 2);
 
+				var part = arg.Split("=", 2);
 				string key = part[0].Replace("--", "").ToLower();
 				string value = part[1];
 

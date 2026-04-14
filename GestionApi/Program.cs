@@ -8,11 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
 
-var connectionString = $"Host={Env.GetString("DB_HOST")};" +
-                       $"Port={Env.GetString("DB_PORT")};" +
-                       $"Database={Env.GetString("DB_NAME")};" +
-                       $"Username={Env.GetString("DB_USER")};" +
-                       $"Password={Env.GetString("DB_PASS")}";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddControllers();
 
 string adminHash = Env.GetString("ADMIN_PASSWORD");
@@ -27,13 +24,30 @@ var app = builder.Build();
 
 app.MapHealthChecks("/health");
 
-
-if (app.Environment.IsDevelopment()){
-	app.UseSwagger();
-	app.UseSwaggerUI();
+using (var scope = app.Services.CreateScope()){
+	var services = scope.ServiceProvider;
+	var context = services.GetRequiredService<AppDbContext>();
+	int retries = 3;
+	while (retries > 0){
+		try {
+			context.Database.Migrate();
+			Console.WriteLine("Conectado correctamente");
+			retries = 0;
+		}
+		catch {
+			Console.WriteLine("Error conectandose");
+			Thread.Sleep(3000);
+			retries--;
+		}
+	}
+	
 }
 
-app.UseHttpsRedirection();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
