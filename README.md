@@ -35,8 +35,9 @@ Para cumplir con este ejercicio tienen que crear un pequeño sistema que permita
 - **GestionApiConsole**: <br>
     Es una aplicación de consola que usando la librería del cliente permite la interacción con la api desde una consola con comandos simples
 
-## Como instalarlo
-Aclaraciones: debes tener una base de datos en postgreSQL de nombre ZinclasDB, proximamente se le añadirá una imagen de docker que automatice este proceso y elimine dependencias para facilitar la instalación.
+# Como instalarlo
+## Antes de hacer esto. debes instalar docker si no lo tenés, puedes descargarlo en la página oficial [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+
 ```
 # 1. Clonar el repo
 git clone https://github.com/MatiasGabrielAraoz/Zinclas-Back-Actividad
@@ -44,11 +45,34 @@ git clone https://github.com/MatiasGabrielAraoz/Zinclas-Back-Actividad
 # 2. Entrar en el directorio del repo
 cd Zinclas-Back-Actividad
 
-# 3. Crear las migraciones (Entity Framework)
-dotnet ef database update --Project GestionApi
+# 3. Entrar en el directorio de la api
+cd GestionApi
 
-# 4. arrancar la Api
-dotnet run --project GestionApi
+# 4. iniciar la imagen de la api con la base de datos creada (debes tener docker instalado)
+docker compose up --build
+
 ```
 
+---
+# Instalar la consola
+## Opción A: Compilarlo desde el código fuente.
+### Requiere [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+```
+# 1. Entrar en la carpeta
+cd GestionApiConsole
 
+# 2. Compilar y ejecutar el programa de consola
+dotnet run
+```
+
+## Opción B: Descargar el ejecutable
+### 1. Ir a la sección [Releases](https://github.com/MatiasGabrielAraoz/Zinclas-Back-Actividad/releases) 
+### 2. Descargar el ejecutable dependiendo de tu sistema operativo
+### 3. Antes de ejecutarlo asegurate de que el contenedor de docker con la api esté en ejecución
+### 4. Ejecuta el archivo que descargaste
+---
+# Como usar la aplicación de consola:
+## Formato de cada comando
+### `[Tabla] [acción] --[flag1=valor] --[flag2=valor] ...  `
+### Ejemplo:
+### `alumnos Get --nombre=Jorgito`
