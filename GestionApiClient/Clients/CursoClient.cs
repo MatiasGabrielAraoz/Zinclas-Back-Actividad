@@ -30,8 +30,8 @@ public partial class ZinclasClient{
 
 	public async Task CreateCoursesAsync(int año, int division){
 		try {
-		var newCourse = new { año = año, division = division};
-		var courses = await _http.PostAsJsonAsync("api/cursos", newCourse);
+			var newCourse = new { año = año, division = division};
+			var courses = await _http.PostAsJsonAsync("api/cursos", newCourse);
 		}
 		catch (Exception ex){
 			Console.WriteLine($"Error al conectar: {ex.Message}");

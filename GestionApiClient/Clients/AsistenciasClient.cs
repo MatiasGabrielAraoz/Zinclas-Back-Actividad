@@ -17,6 +17,17 @@ public partial class ZinclasClient{
 			return new List<AsistenciasGetDto>();
 		}
 	}
+	public async Task<AsistenciasGetDto> GetAsistanceAsync(int id){
+		// TODO: Hacer llamada a la api para conseguir una lista con todos los cursos
+		try {
+			var asistencias = await _http.GetFromJsonAsync<AsistenciasGetDto>($"api/asistencias/{id}");
+			return asistencias ?? new AsistenciasGetDto();
+		}
+		catch (Exception ex){
+			Console.WriteLine($"Error al conectar: {ex.Message}");
+			return new AsistenciasGetDto();
+		}
+	}
 	public async Task<AsistenciasResumenDto> GetAsistancesResumeAsync(int id){
 		try {
 			AsistenciasResumenDto? resumen = await _http.GetFromJsonAsync<AsistenciasResumenDto>($"api/asistencias/{id}");
@@ -32,6 +43,40 @@ public partial class ZinclasClient{
 			return new AsistenciasResumenDto {};
 		}
 		
+	}
+	public async Task PostAsistanceAsync(int id, DateTime date, bool presente){
+		try {
+			AsistenciasCreateDto asistencia = new AsistenciasCreateDto {
+				fecha = date,
+				alumnoID = id,
+				presente = presente				
+			};
+			var request = await _http.PostAsJsonAsync("api/asistencia",asistencia);
+			if (!request.IsSuccessStatusCode){
+				Console.WriteLine($"Error: {request.StatusCode}");
+			}
+		}	
+
+		catch (Exception ex){
+			Console.WriteLine($"Error: {ex.Message}");
+		}
+	}
+	public async Task UpdateAsistanceAsync(int alumnoID, DateTime date, bool? presente){
+		try{
+			if (presente == null) return;
+			AsistenciasUpdateDto asistencia = new AsistenciasUpdateDto{
+				fecha = date,
+				alumnoID = alumnoID,
+				presente = presente
+			};
+			AsistenciasGetDto asistenciaDto = await GetAsistanceAsync(alumnoID);
+			if (asistenciaDto == null) return;
+
+		}
+		catch (Exception ex){
+			Console.WriteLine($"Error {ex.Message}");
+
+		}
 	}
 }
 
