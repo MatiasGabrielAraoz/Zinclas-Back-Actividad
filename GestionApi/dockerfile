@@ -1,0 +1,2 @@
+FROM alpine:3.14
+RUN apk add dotnet8-sdk aspnetcore8-runtime dotnet8-runtime
