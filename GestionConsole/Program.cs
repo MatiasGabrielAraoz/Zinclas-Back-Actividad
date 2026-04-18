@@ -85,7 +85,7 @@ public class GestionApiConsole{
 					break;
 
 				case "asistencia" or "asistencias":
-					Console.WriteLine("Work in progress");
+					await asistanceHandler.Handle(accion, flags);
 					break;
 
 				case "apiurl":

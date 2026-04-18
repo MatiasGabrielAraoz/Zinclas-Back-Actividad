@@ -58,7 +58,7 @@ namespace GestionApi.Controllers{
 					Name = alumno.Name,
 					CursoID = alumno.CursoID		
 				}).ToListAsync();
-			if (alumnosDto == null){
+			if (!alumnosDto.Any()){
 				return NotFound(new { message = "No existe ningún alumno"});
 			}
 

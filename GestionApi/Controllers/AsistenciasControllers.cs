@@ -20,7 +20,7 @@ namespace GestionApi.Controllers{
 
 
 		[HttpGet]
-		public async Task<ActionResult<Asistencia>> GetAsistencia([FromQuery] int AlumnoID, [FromBody] DateTime Fecha){
+		public async Task<ActionResult<AsistenciasGetDto>> GetAsistencia([FromQuery] int AlumnoID, DateTime Fecha){
 			var asistencia = await _context.Asistencias
 				.FirstOrDefaultAsync(a => a.AlumnoID == AlumnoID && a.Fecha.Date == Fecha.Date);
 
@@ -32,12 +32,18 @@ namespace GestionApi.Controllers{
 
 		}
 		[HttpGet("{id}")]
-		public async Task<ActionResult<AsistenciasResumenDto>> GetResumenAlumno([FromRoute] int id){
+		public async Task<ActionResult<AsistenciasResumenDto>> GetResumenAlumno([FromRoute] int alumnoId){
 			var asistencias = await _context.Asistencias
-				.Where(a => a.AlumnoID == id)
+				.Where(a => a.AlumnoID == alumnoId)
 				.ToListAsync();
 			int Presentes = 0;
 			int Ausentes = 0;
+			var alumno = await _context.Alumnos
+				.Where(a => a.ID == alumnoId)
+				.Select(a => new AlumnoGetDto {
+				ID = a.ID,
+				Name = a.Name
+			}).FirstOrDefaultAsync();
 			
 			foreach (var asistencia in asistencias){
 				if (asistencia.Presente){
@@ -50,8 +56,10 @@ namespace GestionApi.Controllers{
 
 			int total = Presentes + Ausentes;
 			int porcentajePromedio = (Presentes / total) * 100;
-
+			if (alumno == null) return BadRequest(new { message = "No se encontró un alumno con esa id"});
+			
 			AsistenciasResumenDto resumen = new AsistenciasResumenDto{
+				nombre = alumno.Name,
 				presentes = Presentes,
 				ausentes = Ausentes,
 				porcentajePresencias = porcentajePromedio
@@ -118,7 +126,7 @@ namespace GestionApi.Controllers{
 			return NoContent();
 		}
 		[HttpPut]
-		public async Task<ActionResult<Asistencia>> UpdateAsistencia([FromQuery] AsistenciasUpdateDto dto){
+		public async Task<ActionResult<Asistencia>> UpdateAsistencia([FromBody] AsistenciasUpdateDto dto){
 			var asistenciaCambiar = await _context.Asistencias.FirstOrDefaultAsync(a => 
 				a.AlumnoID == dto.alumnoID && 
 				a.Fecha == dto.fecha

@@ -7,10 +7,14 @@ public partial class ZinclasClient{
 	
 	// si el no se especifica una id devolver todos los alumnos
 	public async Task<List<AsistenciasGetDto>> GetAsistancesAsync(){
-		// TODO: Hacer llamada a la api para conseguir una lista con todos los cursos
 		try {
-			var asistencias = await _http.GetFromJsonAsync<List<AsistenciasGetDto>>($"api/asistencias");
-			return asistencias ?? new List<AsistenciasGetDto>();
+			var response = await _http.GetAsync("api/asistencias");
+			if (response.IsSuccessStatusCode){
+				return await response.Content.ReadFromJsonAsync<List<AsistenciasGetDto>>() ??
+					new List<AsistenciasGetDto>();
+			}
+			Console.WriteLine($"Api error: {response.StatusCode}");
+			return  new List<AsistenciasGetDto>();
 		}
 		catch (Exception ex){
 			Console.WriteLine($"Error al conectar: {ex.Message}");
@@ -18,10 +22,14 @@ public partial class ZinclasClient{
 		}
 	}
 	public async Task<AsistenciasGetDto> GetAsistanceAsync(int id){
-		// TODO: Hacer llamada a la api para conseguir una lista con todos los cursos
 		try {
-			var asistencias = await _http.GetFromJsonAsync<AsistenciasGetDto>($"api/asistencias/{id}");
-			return asistencias ?? new AsistenciasGetDto();
+			var response = await _http.GetAsync($"api/asistencias/{id}");
+			if (response.IsSuccessStatusCode){
+				return await response.Content.ReadFromJsonAsync<AsistenciasGetDto>() ??
+					new AsistenciasGetDto();
+			}
+
+			return  new AsistenciasGetDto();
 		}
 		catch (Exception ex){
 			Console.WriteLine($"Error al conectar: {ex.Message}");
@@ -53,7 +61,8 @@ public partial class ZinclasClient{
 			};
 			var request = await _http.PostAsJsonAsync("api/asistencia",asistencia);
 			if (!request.IsSuccessStatusCode){
-				Console.WriteLine($"Error: {request.StatusCode}");
+				var errorbody = await request.Content.ReadAsStringAsync();
+				throw new Exception(errorbody);
 			}
 		}	
 
@@ -71,12 +80,39 @@ public partial class ZinclasClient{
 			};
 			AsistenciasGetDto asistenciaDto = await GetAsistanceAsync(alumnoID);
 			if (asistenciaDto == null) return;
+			var request = new HttpRequestMessage(HttpMethod.Put, $"api/asistencias/{alumnoID}"){
+				Content = JsonContent.Create(asistencia)
+			};
+			var response = await _http.SendAsync(request);
 
+			if (!response.IsSuccessStatusCode){
+				String errorbody = await response.Content.ReadAsStringAsync();
+				throw new Exception(errorbody);
+			}
+			
 		}
+
 		catch (Exception ex){
 			Console.WriteLine($"Error {ex.Message}");
-
 		}
+	}
+
+
+	public async Task DeleteAsistanceAsync(int alumnoID, DateTime date, string password){
+		AsistenciasDeleteDto alumnoEliminar = new AsistenciasDeleteDto(){
+			alumnoID = alumnoID,
+			fecha = date,
+			password = password
+		};
+		var request = new HttpRequestMessage(HttpMethod.Delete, $"api/asistencias/"){
+			Content = JsonContent.Create(alumnoEliminar)
+		};
+		var response = await _http.SendAsync(request);
+		if (!response.IsSuccessStatusCode){
+			var error = await response.Content.ReadAsStringAsync();
+			throw new Exception(error);
+		}
+		
 	}
 }
 

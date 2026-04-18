@@ -21,6 +21,7 @@ public class AsistenciasUpdateDto{
 	public bool? presente {get; set;}
 }
 public class AsistenciasResumenDto{
+	public String nombre {get; set;} = "";
 	public int presentes {get; set;}
 	public int ausentes {get; set;}
 	public int porcentajePresencias {get; set;}
