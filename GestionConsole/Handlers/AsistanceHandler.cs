@@ -15,22 +15,38 @@ public class AsistenciaHandler{
 				try{
 					var asistenciaDto = await _client.GetAsistancesResumeAsync(int.Parse(flags["id"]));
 					Console.WriteLine(
+						"---------------------------------- \n" +
 						$"Nombre: {asistenciaDto.nombre} \n"+
 						$"Presentes: {asistenciaDto.presentes} \n"+
 						$"Ausentes: {asistenciaDto.ausentes} \n"+
-						$"Asistió el {asistenciaDto.porcentajePresencias}% de las clases"
+						$"Asistió el {asistenciaDto.porcentajePresencias}% de las clases \n" +
+						"---------------------------------- \n" 
 					);
 				}
 				catch{
-					await _client.GetAsistancesAsync();
+					var asistencias = await _client.GetAsistancesAsync();
+					foreach (var asistencia in asistencias){
+					Console.WriteLine(
+						"---------------------------------- \n" +
+						$"fecha: {asistencia.fecha} \n"+
+						$"Presentes: {asistencia.presente} \n"+
+						$"alumnoID: {asistencia.alumnoID} \n" +
+						"---------------------------------- \n" 
+					);
+					}
 				}
 				break;
 			case "post":
 				try {
 					int id = int.TryParse(flags.GetValueOrDefault("id"), out int id1) ? id1 :
 						int.TryParse(flags.GetValueOrDefault("alumnoid"), out int id2) ? id2 : 0;
+					if (id == 0){
+						Console.WriteLine("Debes especificar una id, con los el argumento --id o --alumnoid");
+						return;
+					}
 
 					if (!DateTime.TryParse(flags.GetValueOrDefault("fecha"), out DateTime fechaValida)){
+						Console.WriteLine($"debes de especificar la fecha en el formato YYYY-MM-DD");
 						return;
 					}
 
@@ -85,6 +101,7 @@ public class AsistenciaHandler{
 						return;
 					}
 					await _client.DeleteAsistanceAsync(id, fechaValida, flags["pass"]);
+					Console.WriteLine("Asistencia eleminada correctamente");
 					
 				}
 				catch (Exception ex){

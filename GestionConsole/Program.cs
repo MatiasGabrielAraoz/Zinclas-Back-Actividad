@@ -43,13 +43,12 @@ public class GestionApiConsole{
 				DisplayExample();
 				continue;
 			}
-			var regexInput = Regex.Matches(input, @"[^\s""]+|""([^""]*)""");
-			String[] inputSplitted = regexInput.Select(p => {
-				if (p.Groups[1].Success){
-					return p.Groups[1].Value;
-				}
-				return p.Value;
-			}).ToArray();
+			var regexInput = Regex.Matches(input, @"[^\s""]+|""([^""]*)""|(?<=\=)""([^""]*)""");
+
+			string[] inputSplitted = Regex.Matches(input, @"([^\s""]+|""[^""]*"")+")
+				.Select(m => m.Value)
+				.ToArray();
+
 
 			string tabla = inputSplitted[0].ToLower();
 			List<String> exitCommands = ["exit", "quit", "salir"];
@@ -115,6 +114,8 @@ public class GestionApiConsole{
 				var part = arg.Split("=", 2);
 				string key = part[0].Replace("--", "").ToLower();
 				string value = part[1];
+
+				value = value.Trim('"');
 
 				flags[key] = value;
 			}

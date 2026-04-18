@@ -18,7 +18,7 @@ public class AlumnoHandler{
 					Console.WriteLine("Alumno creado correctamente.");
 				}
 				catch {
-					Console.WriteLine("Formato incorrecto, debes usar las flags --name=nombre y --id=numero");
+					Console.WriteLine("Formato incorrecto, debes usar las flags --name=nombre y --cursoid=numero");
 				}
 				break;
 

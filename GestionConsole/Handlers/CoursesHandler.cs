@@ -12,7 +12,13 @@ public class CourseHandler{
 	public async Task Handle(string accion, Dictionary<string, string> flags){
 		switch (accion){
 			case "post":
-				await _client.CreateCoursesAsync(int.Parse(flags["año"]), int.Parse(flags["division"]));
+				try {
+					await _client.CreateCoursesAsync(int.Parse(flags["año"]), int.Parse(flags["division"]));
+				}
+				catch(Exception ex){
+					Console.WriteLine($"Error {ex.Message}");
+
+				}
 				//TODO: extraer diccionario y llamar a _client.PostAsistenciaAsync
 				break;
 			case "get":
@@ -20,13 +26,26 @@ public class CourseHandler{
 				if (!flags.ContainsKey("id")){
 					var courses = await _client.GetCoursesAsync();
 					foreach (var course in courses){
-						Console.WriteLine($"Año: {course.año} \nDivision: {course.division} \nID: {course.ID}");
+						Console.WriteLine(
+								"---------------------------------- \n" +
+								$"Año: {course.año} \n" +
+								$"Division: {course.division} \n" +
+								$"ID: {course.ID} \n" +
+								"---------------------------------- \n" 
+						);
 					}
 
 				}
 				else {
 					var course = await _client.GetCourseAsync(int.Parse(flags["id"]) );
-					Console.WriteLine($"Año: {course.año} \nDivision: {course.division} \nID: {course.ID}");
+					Console.WriteLine(
+							"---------------------------------- \n" +
+							$"Año: {course.año} \n" + 
+							$"Division: {course.division} \n" + 
+							$"ID: {course.ID} \n" +
+							"---------------------------------- \n" 
+
+					);
 
 				}
 				break;
